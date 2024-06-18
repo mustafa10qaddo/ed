@@ -1,0 +1,50 @@
+{% extends "dashboard.html"%}
+{% block new_course %}
+
+<form action="/dashboard/new_course" method="POST" enctype="multipart/form-data">
+    {{ new_course_form.hidden_tag() }}
+    <div class="mb-3">
+        {{ new_course_form.title.label(class='form-control-label')}}
+        {% if new_course_form.title.errors %}
+        {{ new_course_form.title(class='form-control is-invalid')}}
+        <div class="invalid-feedback">
+            {% for error in new_course_form.title.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% else %}
+        {{ new_course_form.title(class='form-control')}}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        {{ new_course_form.description.label(class='form-control-label')}}
+        {% if new_course_form.description.errors %}
+        {{ new_course_form.description(class='form-control is-invalid')}}
+        <div class="invalid-feedback">
+            {% for error in new_course_form.description.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% else %}
+        {{ new_course_form.description(class='form-control')}}
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        {{ new_course_form.icon.label(class='form-control-label')}}
+        {% if new_course_form.icon.errors %}
+        {{ new_course_form.icon(class='form-control is-invalid')}}
+        <div class="invalid-feedback">
+            {% for error in new_course_form.icon.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% else %}
+        {{ new_course_form.icon(class='form-control')}}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        {{new_course_form.submit(class='btn btn-primary')}}
+    </div>
+</form>
+{% endblock new_course %}

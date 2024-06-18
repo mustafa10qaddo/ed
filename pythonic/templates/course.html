@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ course.title }}</h1>
+    <p>{{ course.description }}</p>
+    <h2>Lessons in {{ course.title }}</h2>
+    <div class="row">
+        {% for lesson in course_lessons %}
+        <div class="col-md-4">
+            <div class="card mb-4 box-shadow">
+                <img class="card-img-top" src="{{ url_for('static', filename='lesson_thumbnails/' + lesson.thumbnail) }}"
+                    alt="Lesson Thumbnail">
+                <div class="card-body">
+                    <h5 class="card-title">{{ lesson.title }}</h5>
+                    <p class="card-text">{{ lesson.content[:100] }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <a href="{{ url_for('lesson', lesson_slug=lesson.slug, course=course.title) }}"
+                                class="btn btn-sm btn-outline-secondary">View Lesson</a>
+                        </div>
+                        <small class="text-muted">Posted on: {{ lesson.date_posted.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
