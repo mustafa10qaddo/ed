@@ -1,32 +1,9 @@
-{% extends "lesson.html" %}
-
-{% block content %}
+{% extends "lesson.html" %} {% block content %}
 <div class="container">
-    <h1>{{ lesson.title }}</h1>
-    <p>{{ lesson.content }}</p>
-    <p>Posted on: {{ lesson.date_posted.strftime('%Y-%m-%d') }}</p>
-    <p>Course: <a href="#">{{ lesson.course_name.title }}</a></p>
-
-    <!-- Example of listing lessons related to the course -->
-    <h2>Other Lessons in {{ lesson.course_name.title }}</h2>
-    <div class="row">
-        {% for lsn in course_lessons %}
-        <div class="col-md-4">
-            <div class="card mb-4 box-shadow">
-                <div class="card-body">
-                    <h5 class="card-title">{{ lsn.title }}</h5>
-                    <p class="card-text">{{ lsn.content[:100] }}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="btn-group">
-                            <a href="{{ url_for('lesson', lesson_slug=lsn.slug, course=lsn.course_name.title) }}"
-                                class="btn btn-sm btn-outline-secondary">View</a>
-                        </div>
-                        <small class="text-muted">Posted on: {{ lsn.date_posted.strftime('%Y-%m-%d') }}</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+  <h1>{{ lesson.title }}</h1>
+  <!-- Display lesson content using CKEditor -->
+  <div class="lesson-content">{{ lesson.content | safe }}</div>
+  <p>Posted on: {{ lesson.date_posted.strftime('%Y-%m-%d') }}</p>
+  <p>Course: <a href="#">{{ lesson.course_name.title }}</a></p>
 </div>
 {% endblock %}
