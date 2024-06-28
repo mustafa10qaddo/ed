@@ -2,7 +2,7 @@ import secrets
 from PIL import Image
 import os
 from pythonic.models import User, Lesson, Course
-from flask import render_template, url_for, flash, redirect, request, session,abort
+from flask import render_template, url_for, flash, redirect, request, session, abort
 from pythonic.forms import (
     NewCourseForm,
     NewLessonForm,
@@ -10,7 +10,7 @@ from pythonic.forms import (
     LoginForm,
     UpdateProfileForm,
     LessonUpdateForm,
-    )
+)
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 import sqlalchemy.orm as so
@@ -36,6 +36,7 @@ def save_picture(form_picture, path, output_size=None):
         i.thumbnail(output_size)
     i.save(picture_path)
     return picture_name
+
 
 def get_previous_next_lesson(lesson):
     course = lesson.course_name
@@ -152,6 +153,7 @@ def profile():
         active_tab="profile",
     )
 
+
 @app.route("/dashboard/new_lesson", methods=["GET", "POST"])
 @login_required
 def new_lesson():
@@ -229,11 +231,11 @@ def new_course():
         )
 
         # Handle the file upload
-        if 'photo' in request.files:
-            file = request.files['photo']
-            if file.filename != '':
+        if "photo" in request.files:
+            file = request.files["photo"]
+            if file.filename != "":
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
                 course.photo = filename
 
         db.session.add(course)
@@ -251,12 +253,14 @@ def new_course():
 
 from flask import render_template, abort
 from pythonic.models import Lesson
+
+
 @app.route("/<string:course>/<string:lesson_slug>")
 def lesson(lesson_slug, course):
     lesson = Lesson.query.filter_by(slug=lesson_slug).first()
     if not lesson:
         abort(404)
-    
+
     # Fetch course lessons for the lesson's course
     course_lessons = Lesson.query.filter_by(course_id=lesson.course_id).all()
 
@@ -268,39 +272,30 @@ def lesson(lesson_slug, course):
     )
 
 
-
-
-
-
 from pythonic.models import Lesson
+
 
 def get_previous_next_lesson(lesson, course):
     # Assuming course is correctly fetched or passed
     lessons = course.lessons
-    
+
     # Filter lessons by course and order by date_posted
-    all_lessons = Lesson.query.filter_by(course_id=course.id).order_by(Lesson.date_posted).all()
-    
+    all_lessons = (
+        Lesson.query.filter_by(course_id=course.id).order_by(Lesson.date_posted).all()
+    )
+
     # Find index of current lesson
-    lesson_index = next((i for i, lsn in enumerate(all_lessons) if lsn.id == lesson.id), None)
+    lesson_index = next(
+        (i for i, lsn in enumerate(all_lessons) if lsn.id == lesson.id), None
+    )
 
     # Calculate previous and next lessons
     previous_lesson = all_lessons[lesson_index - 1] if lesson_index > 0 else None
-    next_lesson = all_lessons[lesson_index + 1] if lesson_index < len(all_lessons) - 1 else None
+    next_lesson = (
+        all_lessons[lesson_index + 1] if lesson_index < len(all_lessons) - 1 else None
+    )
 
     return previous_lesson, next_lesson
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 @app.route("/<string:course_title>")
@@ -316,12 +311,10 @@ def course(course_title):
     )
 
 
-
 @app.route("/courses")
 def courses():
     courses = Course.query.all()
     return render_template("courses.html", title="Courses", courses=courses)
-
 
 
 @app.route("/dashboard/user_lessons", methods=["GET", "POST"])
@@ -335,14 +328,19 @@ def user_lessons():
         "user_lessons.html",
         title="Your Lessons",
         active_tab="user_lessons",
-        lessons=user_lessons
+        lessons=user_lessons,
     )
+
 
 @app.route("/<string:course>/<string:lesson_slug>/update", methods=["GET", "POST"])
 @login_required
 def update_lesson(course, lesson_slug):
     # Retrieve the lesson based on course title and lesson slug
-    lesson = Lesson.query.join(Course).filter(Course.title == course, Lesson.slug == lesson_slug).first_or_404()
+    lesson = (
+        Lesson.query.join(Course)
+        .filter(Course.title == course, Lesson.slug == lesson_slug)
+        .first_or_404()
+    )
 
     # Check if the current user is authorized to update this lesson
     if lesson.author != current_user:
@@ -355,21 +353,21 @@ def update_lesson(course, lesson_slug):
     if form.validate_on_submit():
         # Retrieve the course object based on form input
         course_obj = Course.query.filter_by(title=form.course.data).first()
-        
+
         # Update lesson attributes based on form data
         if course_obj:
             lesson.course_id = course_obj.id
         lesson.title = form.title.data
         lesson.slug = str(form.slug.data).replace(" ", "-")
         lesson.content = form.content.data
-        
+
         # Handle thumbnail upload (if provided)
         if form.thumbnail.data:
             lesson.thumbnail = save_picture(form.thumbnail.data)
-        
+
         # Commit changes to the database
         db.session.commit()
-        
+
         # Flash success message and redirect to the updated lesson page
         flash("Your lesson has been updated!", "success")
         return redirect(url_for("home", lesson_slug=lesson.slug, course=course))
@@ -385,13 +383,13 @@ def update_lesson(course, lesson_slug):
     course_obj = Course.query.filter_by(id=lesson.course_id).first_or_404()
 
     # Render the update lesson template with necessary data
-    return render_template("update_lesson.html", title="Update | " + lesson.title, lesson=lesson, course=course_obj, form=form)
-
-
-
-
-
-
+    return render_template(
+        "update_lesson.html",
+        title="Update | " + lesson.title,
+        lesson=lesson,
+        course=course_obj,
+        form=form,
+    )
 
 
 @app.route("/lesson/<lesson_id>/delete", methods=["POST"])
@@ -403,3 +401,13 @@ def delete_lesson(lesson_id):
     db.session.commit()
     flash("Your lesson has been deleted!", "success")
     return redirect(url_for("user_lessons"))
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template("500.html"), 500
+
+
+@app.errorhandler(404)
+def internal_error(error):
+    return render_template("404.html"), 404
